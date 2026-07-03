@@ -1,0 +1,29 @@
+'use strict';
+
+import PostgresBackend from './postgres.backend';
+import PostgresConnector, {type PostgresConnectorOptionsType} from './postgres.connector';
+import PostgresListener, {type PostgresNotificationType} from './postgres.listener';
+import TablesEntitiesMap from './tables.entities.map';
+
+import LiveUpdates, {LiveUpdatesRegistry} from './decorators/live.updates';
+
+import ObservableTable from './functions/observable.table';
+import ObservableTablesMap from './functions/observable.tables.map';
+import installTriggers from './functions/install.triggers';
+import processEntities from './functions/process.entities';
+
+export {
+	PostgresBackend, //
+	PostgresConnector,
+	PostgresListener,
+	TablesEntitiesMap,
+	LiveUpdates,
+	LiveUpdatesRegistry,
+	ObservableTable,
+	ObservableTablesMap,
+	installTriggers,
+	processEntities
+};
+export type {PostgresConnectorOptionsType, PostgresNotificationType};
+const OwservablePostgres = {};
+export default OwservablePostgres;
