@@ -2,6 +2,8 @@
 
 # @owservable/postgres
 
+[📖 API Docs](https://owservable.github.io/postgres/docs/) · [✅ Coverage](https://owservable.github.io/postgres/coverage/)
+
 PostgreSQL backend adapter for [@owservable/core](https://github.com/owservable/core): live data via LISTEN/NOTIFY triggers over MikroORM entities.
 
 ## 🚀 Features
