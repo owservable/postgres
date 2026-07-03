@@ -21,7 +21,7 @@
 	},
 	"minimumReleaseAge": 2880,
 	"scripts": {
-		"all": "pnpm i & pnpm dedupe & pnpm audit --fix=update & pnpm clean & pnpm format & pnpm build & skeletest -f & strictr -f & pnpm test & pnpm docs @owservable/postgres",
+		"all": "pnpm i & pnpm dedupe & pnpm audit --fix=update & pnpm clean & pnpm format & pnpm build & skeletest -f & strictr -f & pnpm test & pnpm run docs @owservable/postgres",
 		"clear:lib": "del /S /Q lib\\*",
 		"build": "pnpm clear:lib & tsc",
 		"build:watch": "tsc --watch",
@@ -57,7 +57,7 @@
 		"@eslint/js": "^10.0.1",
 		"@mikro-orm/core": "^6.6.15",
 		"@mikro-orm/postgresql": "^6.6.15",
-		"@owservable/core": "link:..\\core",
+		"@owservable/core": "^3.0.0",
 		"@types/jest": "^30.0.0",
 		"@types/rewire": "^2.5.30",
 		"coveralls": "^3.1.1",

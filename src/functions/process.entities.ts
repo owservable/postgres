@@ -20,7 +20,7 @@ const _isExcluded = (folder: string, exclude: string | string[]): boolean => {
 		: !!find(exclude, (e: string) => endsWith(folder, e));
 };
 
-const _processEntities = (folder: string, entities: any[], exclude?: string | string[]): void => {
+const _processPostgresEntities = (folder: string, entities: any[], exclude?: string | string[]): void => {
 	if (_isExcluded(folder, exclude)) return;
 
 	const subfolderNames: string[] = fs.readdirSync(folder);
@@ -44,14 +44,14 @@ const _processEntities = (folder: string, entities: any[], exclude?: string | st
 		_processFile(folder, file.name, entities);
 	});
 
-	folders.forEach((subFolder: ItemStat): void => _processEntities(subFolder.fullPath, entities, exclude));
+	folders.forEach((subFolder: ItemStat): void => _processPostgresEntities(subFolder.fullPath, entities, exclude));
 };
 
-const processEntities = (root: string, name: string = 'entities', exclude?: string | string[]): any[] => {
+const processPostgresEntities = (root: string, name: string = 'entities', exclude?: string | string[]): any[] => {
 	const entities: any[] = [];
 	const folders: string[] = listSubfoldersByName(root, name);
-	folders.forEach((folder: string): void => _processEntities(folder, entities, exclude));
+	folders.forEach((folder: string): void => _processPostgresEntities(folder, entities, exclude));
 	return entities;
 };
 
-export default processEntities;
+export default processPostgresEntities;

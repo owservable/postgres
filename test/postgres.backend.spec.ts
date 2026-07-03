@@ -5,8 +5,8 @@ import {ReplaySubject, Subject} from 'rxjs';
 import {wrap} from '@mikro-orm/core';
 
 import PostgresBackend from '../src/postgres.backend';
-import ObservableTable from '../src/functions/observable.table';
-import ObservableTablesMap from '../src/functions/observable.tables.map';
+import PostgresObservableTable from '../src/functions/observable.table';
+import PostgresObservableTablesMap from '../src/functions/observable.tables.map';
 
 jest.mock('@mikro-orm/core', () => ({wrap: jest.fn()}));
 
@@ -26,7 +26,7 @@ describe('postgres.backend tests', () => {
 	};
 
 	beforeEach(() => {
-		ObservableTablesMap.clear();
+		PostgresObservableTablesMap.clear();
 		em = {find: jest.fn(), findOne: jest.fn(), count: jest.fn()};
 		orm = {getMetadata: (): any => ({get: (): any => meta}), em: {fork: jest.fn((): any => em)}};
 		listener = {notifications: new Subject<any>(), lifecycle: new ReplaySubject<any>(1)};
@@ -41,7 +41,7 @@ describe('postgres.backend tests', () => {
 
 	it('should return the same observable table from changes', () => {
 		const changes: any = backend.changes();
-		expect(changes).toBeInstanceOf(ObservableTable);
+		expect(changes).toBeInstanceOf(PostgresObservableTable);
 		expect(backend.changes()).toBe(changes);
 	});
 

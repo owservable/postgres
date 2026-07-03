@@ -1,2 +1,2 @@
-declare const installTriggers: (orm: any, entities: any[], channel?: string) => Promise<void>;
-export default installTriggers;
+declare const installPostgresTriggers: (orm: any, entities: any[], channel?: string) => Promise<void>;
+export default installPostgresTriggers;

@@ -1,35 +1,35 @@
 'use strict';
 
-import ObservableTable from './observable.table';
+import PostgresObservableTable from './observable.table';
 import PostgresListener from '../postgres.listener';
 
-class ObservableTablesMap {
-	public static init(): ObservableTablesMap {
-		if (!ObservableTablesMap._instance) ObservableTablesMap._instance = new ObservableTablesMap();
-		return ObservableTablesMap._instance;
+class PostgresObservableTablesMap {
+	public static init(): PostgresObservableTablesMap {
+		if (!PostgresObservableTablesMap._instance) PostgresObservableTablesMap._instance = new PostgresObservableTablesMap();
+		return PostgresObservableTablesMap._instance;
 	}
 
-	public static get(orm: any, entity: any, listener: PostgresListener): ObservableTable {
-		const instance: ObservableTablesMap = ObservableTablesMap.init();
-		const map: Map<string, ObservableTable> = instance._map;
+	public static get(orm: any, entity: any, listener: PostgresListener): PostgresObservableTable {
+		const instance: PostgresObservableTablesMap = PostgresObservableTablesMap.init();
+		const map: Map<string, PostgresObservableTable> = instance._map;
 
 		const meta: any = orm.getMetadata().get(entity.name);
 		const tableName: string = meta.tableName;
-		if (!map.get(tableName)) map.set(tableName, new ObservableTable(orm, entity, listener));
+		if (!map.get(tableName)) map.set(tableName, new PostgresObservableTable(orm, entity, listener));
 
 		return map.get(tableName);
 	}
 
 	public static clear(): void {
-		if (ObservableTablesMap._instance) ObservableTablesMap._instance._map.clear();
+		if (PostgresObservableTablesMap._instance) PostgresObservableTablesMap._instance._map.clear();
 	}
 
-	private static _instance: ObservableTablesMap;
+	private static _instance: PostgresObservableTablesMap;
 
-	private readonly _map: Map<string, ObservableTable>;
+	private readonly _map: Map<string, PostgresObservableTable>;
 
 	private constructor() {
-		this._map = new Map<string, ObservableTable>();
+		this._map = new Map<string, PostgresObservableTable>();
 	}
 }
-export default ObservableTablesMap;
+export default PostgresObservableTablesMap;

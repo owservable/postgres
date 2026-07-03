@@ -1,11 +1,11 @@
-import ObservableTable from './observable.table';
+import PostgresObservableTable from './observable.table';
 import PostgresListener from '../postgres.listener';
-declare class ObservableTablesMap {
-    static init(): ObservableTablesMap;
-    static get(orm: any, entity: any, listener: PostgresListener): ObservableTable;
+declare class PostgresObservableTablesMap {
+    static init(): PostgresObservableTablesMap;
+    static get(orm: any, entity: any, listener: PostgresListener): PostgresObservableTable;
     static clear(): void;
     private static _instance;
     private readonly _map;
     private constructor();
 }
-export default ObservableTablesMap;
+export default PostgresObservableTablesMap;

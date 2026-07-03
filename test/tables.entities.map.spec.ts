@@ -1,49 +1,49 @@
 'use strict';
 
-import TablesEntitiesMap from '../src/tables.entities.map';
+import PostgresTablesEntitiesMap from '../src/tables.entities.map';
 
 class UserEntity {}
 class NoteEntity {}
 
 describe('tables.entities.map tests', () => {
 	beforeEach(() => {
-		TablesEntitiesMap.clear();
+		PostgresTablesEntitiesMap.clear();
 	});
 
 	it('should add and retrieve entities by table name', () => {
-		TablesEntitiesMap.addTableToEntityMapping('users', UserEntity);
-		TablesEntitiesMap.addTableToEntityMapping('notes', NoteEntity);
-		expect(TablesEntitiesMap.getEntityByTable('users')).toBe(UserEntity);
-		expect(TablesEntitiesMap.getEntityByTable('notes')).toBe(NoteEntity);
+		PostgresTablesEntitiesMap.addTableToEntityMapping('users', UserEntity);
+		PostgresTablesEntitiesMap.addTableToEntityMapping('notes', NoteEntity);
+		expect(PostgresTablesEntitiesMap.getEntityByTable('users')).toBe(UserEntity);
+		expect(PostgresTablesEntitiesMap.getEntityByTable('notes')).toBe(NoteEntity);
 	});
 
 	it('should return null for missing table names', () => {
-		expect(TablesEntitiesMap.getEntityByTable('missing')).toBeNull();
+		expect(PostgresTablesEntitiesMap.getEntityByTable('missing')).toBeNull();
 	});
 
 	it('should list keys and values', () => {
-		TablesEntitiesMap.addTableToEntityMapping('users', UserEntity);
-		TablesEntitiesMap.addTableToEntityMapping('notes', NoteEntity);
-		expect(TablesEntitiesMap.keys()).toEqual(['users', 'notes']);
-		expect(TablesEntitiesMap.values()).toEqual([UserEntity, NoteEntity]);
+		PostgresTablesEntitiesMap.addTableToEntityMapping('users', UserEntity);
+		PostgresTablesEntitiesMap.addTableToEntityMapping('notes', NoteEntity);
+		expect(PostgresTablesEntitiesMap.keys()).toEqual(['users', 'notes']);
+		expect(PostgresTablesEntitiesMap.values()).toEqual([UserEntity, NoteEntity]);
 	});
 
 	it('should overwrite an existing mapping', () => {
-		TablesEntitiesMap.addTableToEntityMapping('users', UserEntity);
-		TablesEntitiesMap.addTableToEntityMapping('users', NoteEntity);
-		expect(TablesEntitiesMap.getEntityByTable('users')).toBe(NoteEntity);
-		expect(TablesEntitiesMap.keys()).toEqual(['users']);
+		PostgresTablesEntitiesMap.addTableToEntityMapping('users', UserEntity);
+		PostgresTablesEntitiesMap.addTableToEntityMapping('users', NoteEntity);
+		expect(PostgresTablesEntitiesMap.getEntityByTable('users')).toBe(NoteEntity);
+		expect(PostgresTablesEntitiesMap.keys()).toEqual(['users']);
 	});
 
 	it('should be instantiable only through its static API', () => {
-		expect(new (TablesEntitiesMap as any)()).toBeInstanceOf(TablesEntitiesMap);
+		expect(new (PostgresTablesEntitiesMap as any)()).toBeInstanceOf(PostgresTablesEntitiesMap);
 	});
 
 	it('should clear all mappings', () => {
-		TablesEntitiesMap.addTableToEntityMapping('users', UserEntity);
-		TablesEntitiesMap.clear();
-		expect(TablesEntitiesMap.keys()).toEqual([]);
-		expect(TablesEntitiesMap.values()).toEqual([]);
-		expect(TablesEntitiesMap.getEntityByTable('users')).toBeNull();
+		PostgresTablesEntitiesMap.addTableToEntityMapping('users', UserEntity);
+		PostgresTablesEntitiesMap.clear();
+		expect(PostgresTablesEntitiesMap.keys()).toEqual([]);
+		expect(PostgresTablesEntitiesMap.values()).toEqual([]);
+		expect(PostgresTablesEntitiesMap.getEntityByTable('users')).toBeNull();
 	});
 });

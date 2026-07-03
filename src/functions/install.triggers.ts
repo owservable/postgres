@@ -33,7 +33,7 @@ CREATE OR REPLACE TRIGGER "${tableName}_owservable_notify"
 AFTER INSERT OR UPDATE OR DELETE ON "${tableName}"
 FOR EACH ROW EXECUTE FUNCTION owservable_notify('${pkColumn}');`;
 
-const installTriggers = async (orm: any, entities: any[], channel: string = 'owservable'): Promise<void> => {
+const installPostgresTriggers = async (orm: any, entities: any[], channel: string = 'owservable'): Promise<void> => {
 	const connection: any = orm.em.getConnection();
 
 	await connection.execute(_notifyFunctionSql(channel));
@@ -45,7 +45,7 @@ const installTriggers = async (orm: any, entities: any[], channel: string = 'ows
 		const pkColumn: string = meta.properties[pkProperty]?.fieldNames?.[0] ?? pkProperty;
 
 		await connection.execute(_tableTriggerSql(tableName, pkColumn));
-		console.log(`[@owservable/postgres] -> installTriggers: live updates enabled for table "${tableName}"`);
+		console.log(`[@owservable/postgres] -> installPostgresTriggers: live updates enabled for table "${tableName}"`);
 	}
 };
-export default installTriggers;
+export default installPostgresTriggers;

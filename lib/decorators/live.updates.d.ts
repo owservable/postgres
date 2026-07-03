@@ -1,4 +1,4 @@
-export declare class LiveUpdatesRegistry {
+export declare class PostgresLiveUpdatesRegistry {
     static add(entity: any): void;
     static has(entity: any): boolean;
     static entities(): any[];
@@ -6,5 +6,5 @@ export declare class LiveUpdatesRegistry {
     private static readonly _entities;
     private constructor();
 }
-declare const LiveUpdates: () => ClassDecorator;
-export default LiveUpdates;
+declare const PostgresLiveUpdates: () => ClassDecorator;
+export default PostgresLiveUpdates;

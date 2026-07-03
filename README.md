@@ -8,10 +8,10 @@ PostgreSQL backend adapter for [@owservable/core](https://github.com/owservable/
 
 - **PostgresBackend**: implements `IObservableBackend` over a MikroORM entity — change feed, queries with Mongo-style operators, relation population
 - **PostgresListener**: one dedicated LISTEN connection with automatic reconnection; stores force a reload after reconnect to cover missed notifications
-- **ObservableTable**: normalizes trigger notifications into change events (PK-refetch enrichment, column→property mapping) shaped exactly like MongoDB change streams
-- **installTriggers**: idempotent `CREATE OR REPLACE` bootstrap (PostgreSQL 14+) — no migration files
-- **@LiveUpdates()**: one-line decorator to opt an entity's table into live updates
-- **processEntities**: scans per-module entity folders and returns the classes for `MikroORM.init`
+- **PostgresObservableTable**: normalizes trigger notifications into change events (PK-refetch enrichment, column→property mapping) shaped exactly like MongoDB change streams
+- **installPostgresTriggers**: idempotent `CREATE OR REPLACE` bootstrap (PostgreSQL 14+) — no migration files
+- **@PostgresLiveUpdates()**: one-line decorator to opt an entity's table into live updates
+- **processPostgresEntities**: scans per-module entity folders and returns the classes for `MikroORM.init`
 - **PostgresConnector**: MikroORM init, advisory-locked `updateSchema({safe: true})`, trigger install and backend registration in one call
 
 ## 📦 Installation

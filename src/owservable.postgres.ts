@@ -3,26 +3,26 @@
 import PostgresBackend from './postgres.backend';
 import PostgresConnector, {type PostgresConnectorOptionsType} from './postgres.connector';
 import PostgresListener, {type PostgresNotificationType} from './postgres.listener';
-import TablesEntitiesMap from './tables.entities.map';
+import PostgresTablesEntitiesMap from './tables.entities.map';
 
-import LiveUpdates, {LiveUpdatesRegistry} from './decorators/live.updates';
+import PostgresLiveUpdates, {PostgresLiveUpdatesRegistry} from './decorators/live.updates';
 
-import ObservableTable from './functions/observable.table';
-import ObservableTablesMap from './functions/observable.tables.map';
-import installTriggers from './functions/install.triggers';
-import processEntities from './functions/process.entities';
+import PostgresObservableTable from './functions/observable.table';
+import PostgresObservableTablesMap from './functions/observable.tables.map';
+import installPostgresTriggers from './functions/install.triggers';
+import processPostgresEntities from './functions/process.entities';
 
 export {
 	PostgresBackend, //
 	PostgresConnector,
 	PostgresListener,
-	TablesEntitiesMap,
-	LiveUpdates,
-	LiveUpdatesRegistry,
-	ObservableTable,
-	ObservableTablesMap,
-	installTriggers,
-	processEntities
+	PostgresTablesEntitiesMap,
+	PostgresLiveUpdates,
+	PostgresLiveUpdatesRegistry,
+	PostgresObservableTable,
+	PostgresObservableTablesMap,
+	installPostgresTriggers,
+	processPostgresEntities
 };
 export type {PostgresConnectorOptionsType, PostgresNotificationType};
 const OwservablePostgres = {};

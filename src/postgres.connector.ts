@@ -7,9 +7,9 @@ import {BackendRegistry} from '@owservable/core';
 
 import PostgresBackend from './postgres.backend';
 import PostgresListener from './postgres.listener';
-import TablesEntitiesMap from './tables.entities.map';
-import installTriggers from './functions/install.triggers';
-import {LiveUpdatesRegistry} from './decorators/live.updates';
+import PostgresTablesEntitiesMap from './tables.entities.map';
+import installPostgresTriggers from './functions/install.triggers';
+import {PostgresLiveUpdatesRegistry} from './decorators/live.updates';
 
 const SCHEMA_SYNC_LOCK_KEY: number = 776277001;
 
@@ -52,8 +52,8 @@ export default class PostgresConnector {
 					console.log('[@owservable/postgres] -> PostgreSQL schema synchronized', safe ? '(safe mode)' : '');
 				}
 				if (triggers) {
-					const liveEntities: any[] = entities.filter((entity: any): boolean => LiveUpdatesRegistry.has(entity));
-					await installTriggers(orm, liveEntities, channel);
+					const liveEntities: any[] = entities.filter((entity: any): boolean => PostgresLiveUpdatesRegistry.has(entity));
+					await installPostgresTriggers(orm, liveEntities, channel);
 				}
 			});
 		}
@@ -64,7 +64,7 @@ export default class PostgresConnector {
 			const meta: any = orm.getMetadata().get(entity.name);
 			const tableName: string = meta.tableName;
 
-			TablesEntitiesMap.addTableToEntityMapping(tableName, entity);
+			PostgresTablesEntitiesMap.addTableToEntityMapping(tableName, entity);
 			BackendRegistry.register(tableName, new PostgresBackend(orm, entity, listener));
 		}
 

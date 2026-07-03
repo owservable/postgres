@@ -7,8 +7,8 @@ import {cloneDeep, each, isArray, isEmpty, isString, keys, omit} from 'lodash';
 import type {IObservableBackend} from '@owservable/core';
 
 import PostgresListener from './postgres.listener';
-import ObservableTable from './functions/observable.table';
-import ObservableTablesMap from './functions/observable.tables.map';
+import PostgresObservableTable from './functions/observable.table';
+import PostgresObservableTablesMap from './functions/observable.tables.map';
 
 export default class PostgresBackend implements IObservableBackend {
 	private readonly _orm: any;
@@ -58,7 +58,7 @@ export default class PostgresBackend implements IObservableBackend {
 	}
 
 	public async findById(id: string, fields: any, populates: any[]): Promise<any> {
-		const observableTable: ObservableTable = this._observableTable();
+		const observableTable: PostgresObservableTable = this._observableTable();
 		return this.findOne({[this._pkProperty]: observableTable.coercePrimaryKey(id)}, fields, populates);
 	}
 
@@ -87,8 +87,8 @@ export default class PostgresBackend implements IObservableBackend {
 		return this._entity;
 	}
 
-	private _observableTable(): ObservableTable {
-		return ObservableTablesMap.get(this._orm, this._entity, this._listener);
+	private _observableTable(): PostgresObservableTable {
+		return PostgresObservableTablesMap.get(this._orm, this._entity, this._listener);
 	}
 
 	private _toObject(entity: any): any {

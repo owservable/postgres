@@ -6,7 +6,7 @@ import {filter, skip} from 'rxjs/operators';
 
 import PostgresListener, {PostgresNotificationType} from '../postgres.listener';
 
-class ObservableTable extends Subject<any> {
+class PostgresObservableTable extends Subject<any> {
 	private readonly _orm: any;
 	private readonly _entity: any;
 	private readonly _tableName: string;
@@ -41,7 +41,7 @@ class ObservableTable extends Subject<any> {
 					this._process(notification) //
 						.then((): null => null)
 						.catch((error: any): void => {
-							console.error(`[@owservable/postgres] -> ObservableTable[${this._tableName}] Error processing notification:`, {notification, error});
+							console.error(`[@owservable/postgres] -> PostgresObservableTable[${this._tableName}] Error processing notification:`, {notification, error});
 						});
 				}
 			});
@@ -98,4 +98,4 @@ class ObservableTable extends Subject<any> {
 		this.next({ns, documentKey, operationType, updateDescription, fullDocument});
 	}
 }
-export default ObservableTable;
+export default PostgresObservableTable;

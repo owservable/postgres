@@ -2,7 +2,7 @@
 
 import {ReplaySubject, Subject} from 'rxjs';
 
-import ObservableTable from '../../src/functions/observable.table';
+import PostgresObservableTable from '../../src/functions/observable.table';
 
 jest.mock('@mikro-orm/core', () => ({wrap: jest.fn()}));
 
@@ -21,11 +21,7 @@ describe('observable.table tests', () => {
 		tableName: 'users',
 		primaryKeys: ['id'],
 		properties: {id: {type: pkType, fieldNames: ['id']}},
-		props: [
-			{name: 'id', fieldNames: ['id']},
-			{name: 'firstName', fieldNames: ['first_name']},
-			{name: 'virtualProp'}
-		]
+		props: [{name: 'id', fieldNames: ['id']}, {name: 'firstName', fieldNames: ['first_name']}, {name: 'virtualProp'}]
 	});
 
 	const createOrm = (meta: any): any => ({
@@ -33,9 +29,9 @@ describe('observable.table tests', () => {
 		em: {fork: jest.fn((): any => em)}
 	});
 
-	const createTable = (meta: any = createMeta()): {table: ObservableTable; orm: any; emissions: any[]} => {
+	const createTable = (meta: any = createMeta()): {table: PostgresObservableTable; orm: any; emissions: any[]} => {
 		const orm: any = createOrm(meta);
-		const table: ObservableTable = new ObservableTable(orm, UserEntity, listener);
+		const table: PostgresObservableTable = new PostgresObservableTable(orm, UserEntity, listener);
 		const emissions: any[] = [];
 		table.subscribe((change: any): void => {
 			emissions.push(change);
@@ -190,7 +186,7 @@ describe('observable.table tests', () => {
 
 		expect(emissions).toEqual([]);
 		expect(errorSpy).toHaveBeenCalledWith(
-			expect.stringContaining('ObservableTable[users] Error processing notification'),
+			expect.stringContaining('PostgresObservableTable[users] Error processing notification'),
 			expect.objectContaining({error: expect.any(Error)})
 		);
 	});

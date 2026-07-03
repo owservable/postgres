@@ -1,4 +1,4 @@
-export default class TablesEntitiesMap {
+export default class PostgresTablesEntitiesMap {
     static addTableToEntityMapping(tableName: string, entity: any): void;
     static getEntityByTable(tableName: string): any | null;
     static keys(): string[];

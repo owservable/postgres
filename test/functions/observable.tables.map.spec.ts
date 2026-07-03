@@ -2,8 +2,8 @@
 
 import {ReplaySubject, Subject} from 'rxjs';
 
-import ObservableTable from '../../src/functions/observable.table';
-import ObservableTablesMap from '../../src/functions/observable.tables.map';
+import PostgresObservableTable from '../../src/functions/observable.table';
+import PostgresObservableTablesMap from '../../src/functions/observable.tables.map';
 
 class UserEntity {}
 class NoteEntity {}
@@ -25,38 +25,38 @@ describe('observable.tables.map tests', () => {
 	});
 
 	it('should tolerate clear before initialization', () => {
-		expect(() => ObservableTablesMap.clear()).not.toThrow();
+		expect(() => PostgresObservableTablesMap.clear()).not.toThrow();
 	});
 
 	it('should return the same singleton from init', () => {
-		expect(ObservableTablesMap.init()).toBe(ObservableTablesMap.init());
+		expect(PostgresObservableTablesMap.init()).toBe(PostgresObservableTablesMap.init());
 	});
 
 	it('should create one observable table per table name', () => {
-		ObservableTablesMap.clear();
+		PostgresObservableTablesMap.clear();
 		const orm: any = createOrm();
 		const listener: any = createListener();
 
-		const users: ObservableTable = ObservableTablesMap.get(orm, UserEntity, listener);
-		const notes: ObservableTable = ObservableTablesMap.get(orm, NoteEntity, listener);
+		const users: PostgresObservableTable = PostgresObservableTablesMap.get(orm, UserEntity, listener);
+		const notes: PostgresObservableTable = PostgresObservableTablesMap.get(orm, NoteEntity, listener);
 
-		expect(users).toBeInstanceOf(ObservableTable);
+		expect(users).toBeInstanceOf(PostgresObservableTable);
 		expect(users.tableName).toBe('users');
 		expect(notes.tableName).toBe('notes');
 		expect(users).not.toBe(notes);
-		expect(ObservableTablesMap.get(orm, UserEntity, listener)).toBe(users);
+		expect(PostgresObservableTablesMap.get(orm, UserEntity, listener)).toBe(users);
 	});
 
 	it('should create a fresh observable table after clear', () => {
-		ObservableTablesMap.clear();
+		PostgresObservableTablesMap.clear();
 		const orm: any = createOrm();
 		const listener: any = createListener();
 
-		const before: ObservableTable = ObservableTablesMap.get(orm, UserEntity, listener);
-		ObservableTablesMap.clear();
-		const after: ObservableTable = ObservableTablesMap.get(orm, UserEntity, listener);
+		const before: PostgresObservableTable = PostgresObservableTablesMap.get(orm, UserEntity, listener);
+		PostgresObservableTablesMap.clear();
+		const after: PostgresObservableTable = PostgresObservableTablesMap.get(orm, UserEntity, listener);
 
-		expect(after).toBeInstanceOf(ObservableTable);
+		expect(after).toBeInstanceOf(PostgresObservableTable);
 		expect(after).not.toBe(before);
 	});
 });

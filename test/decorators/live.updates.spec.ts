@@ -1,50 +1,50 @@
 'use strict';
 
-import LiveUpdates, {LiveUpdatesRegistry} from '../../src/decorators/live.updates';
+import PostgresLiveUpdates, {PostgresLiveUpdatesRegistry} from '../../src/decorators/live.updates';
 
 describe('live.updates tests', () => {
 	beforeEach(() => {
-		LiveUpdatesRegistry.clear();
+		PostgresLiveUpdatesRegistry.clear();
 	});
 
 	it('should register a class through the decorator', () => {
 		class UserEntity {}
 
-		const decorate: ClassDecorator = LiveUpdates();
+		const decorate: ClassDecorator = PostgresLiveUpdates();
 		decorate(UserEntity as any);
 
-		expect(LiveUpdatesRegistry.has(UserEntity)).toBe(true);
-		expect(LiveUpdatesRegistry.entities()).toEqual([UserEntity]);
+		expect(PostgresLiveUpdatesRegistry.has(UserEntity)).toBe(true);
+		expect(PostgresLiveUpdatesRegistry.entities()).toEqual([UserEntity]);
 	});
 
 	it('should report false for unregistered classes', () => {
 		class NoteEntity {}
 
-		expect(LiveUpdatesRegistry.has(NoteEntity)).toBe(false);
-		expect(LiveUpdatesRegistry.entities()).toEqual([]);
+		expect(PostgresLiveUpdatesRegistry.has(NoteEntity)).toBe(false);
+		expect(PostgresLiveUpdatesRegistry.entities()).toEqual([]);
 	});
 
 	it('should deduplicate entities added directly to the registry', () => {
 		class TagEntity {}
 
-		LiveUpdatesRegistry.add(TagEntity);
-		LiveUpdates()(TagEntity);
+		PostgresLiveUpdatesRegistry.add(TagEntity);
+		PostgresLiveUpdates()(TagEntity);
 
-		expect(LiveUpdatesRegistry.has(TagEntity)).toBe(true);
-		expect(LiveUpdatesRegistry.entities()).toEqual([TagEntity]);
+		expect(PostgresLiveUpdatesRegistry.has(TagEntity)).toBe(true);
+		expect(PostgresLiveUpdatesRegistry.entities()).toEqual([TagEntity]);
 	});
 
 	it('should be instantiable only through its static API', () => {
-		expect(new (LiveUpdatesRegistry as any)()).toBeInstanceOf(LiveUpdatesRegistry);
+		expect(new (PostgresLiveUpdatesRegistry as any)()).toBeInstanceOf(PostgresLiveUpdatesRegistry);
 	});
 
 	it('should clear the registry', () => {
 		class TagEntity {}
 
-		LiveUpdatesRegistry.add(TagEntity);
-		LiveUpdatesRegistry.clear();
+		PostgresLiveUpdatesRegistry.add(TagEntity);
+		PostgresLiveUpdatesRegistry.clear();
 
-		expect(LiveUpdatesRegistry.has(TagEntity)).toBe(false);
-		expect(LiveUpdatesRegistry.entities()).toEqual([]);
+		expect(PostgresLiveUpdatesRegistry.has(TagEntity)).toBe(false);
+		expect(PostgresLiveUpdatesRegistry.entities()).toEqual([]);
 	});
 });

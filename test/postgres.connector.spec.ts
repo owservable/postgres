@@ -7,9 +7,9 @@ import {BackendRegistry} from '@owservable/core';
 import PostgresConnector from '../src/postgres.connector';
 import PostgresListener from '../src/postgres.listener';
 import PostgresBackend from '../src/postgres.backend';
-import TablesEntitiesMap from '../src/tables.entities.map';
-import ObservableTablesMap from '../src/functions/observable.tables.map';
-import {LiveUpdatesRegistry} from '../src/decorators/live.updates';
+import PostgresTablesEntitiesMap from '../src/tables.entities.map';
+import PostgresObservableTablesMap from '../src/functions/observable.tables.map';
+import {PostgresLiveUpdatesRegistry} from '../src/decorators/live.updates';
 
 jest.mock('pg', () => ({Client: jest.fn()}));
 jest.mock('@mikro-orm/postgresql', () => ({MikroORM: {init: jest.fn()}}));
@@ -83,9 +83,9 @@ describe('postgres.connector tests', () => {
 		};
 		InitMock.mockResolvedValue(mockOrm);
 		BackendRegistry.clear();
-		LiveUpdatesRegistry.clear();
-		TablesEntitiesMap.clear();
-		ObservableTablesMap.clear();
+		PostgresLiveUpdatesRegistry.clear();
+		PostgresTablesEntitiesMap.clear();
+		PostgresObservableTablesMap.clear();
 		logSpy = jest.spyOn(console, 'log').mockImplementation((): undefined => undefined);
 		jest.spyOn(console, 'warn').mockImplementation((): undefined => undefined);
 		jest.spyOn(console, 'info').mockImplementation((): undefined => undefined);
@@ -107,7 +107,7 @@ describe('postgres.connector tests', () => {
 	});
 
 	it('should initialize the orm, sync the schema under an advisory lock and register backends', async () => {
-		LiveUpdatesRegistry.add(UserEntity);
+		PostgresLiveUpdatesRegistry.add(UserEntity);
 
 		const orm: any = await PostgresConnector.init(baseOptions());
 		await flush();
@@ -141,8 +141,8 @@ describe('postgres.connector tests', () => {
 		expect(BackendRegistry.get('users')).toBeInstanceOf(PostgresBackend);
 		expect(BackendRegistry.get('notes')).toBeInstanceOf(PostgresBackend);
 		expect((BackendRegistry.get('users') as PostgresBackend).entity).toBe(UserEntity);
-		expect(TablesEntitiesMap.getEntityByTable('users')).toBe(UserEntity);
-		expect(TablesEntitiesMap.getEntityByTable('notes')).toBe(NoteEntity);
+		expect(PostgresTablesEntitiesMap.getEntityByTable('users')).toBe(UserEntity);
+		expect(PostgresTablesEntitiesMap.getEntityByTable('notes')).toBe(NoteEntity);
 
 		expect(PostgresConnector.orm).toBe(mockOrm);
 		expect(PostgresConnector.em()).toBe('forked-em');
@@ -159,7 +159,7 @@ describe('postgres.connector tests', () => {
 	});
 
 	it('should honor custom channel, unsafe schema sync and orm options', async () => {
-		LiveUpdatesRegistry.add(NoteEntity);
+		PostgresLiveUpdatesRegistry.add(NoteEntity);
 
 		await PostgresConnector.init({
 			...baseOptions(),
@@ -181,7 +181,7 @@ describe('postgres.connector tests', () => {
 	});
 
 	it('should skip schema sync but still install triggers when updateSchema is false', async () => {
-		LiveUpdatesRegistry.add(UserEntity);
+		PostgresLiveUpdatesRegistry.add(UserEntity);
 
 		await PostgresConnector.init({...baseOptions(), updateSchema: false, triggers: true});
 
@@ -191,7 +191,7 @@ describe('postgres.connector tests', () => {
 	});
 
 	it('should sync the schema but skip triggers when triggers is false', async () => {
-		LiveUpdatesRegistry.add(UserEntity);
+		PostgresLiveUpdatesRegistry.add(UserEntity);
 
 		await PostgresConnector.init({...baseOptions(), updateSchema: true, triggers: false});
 

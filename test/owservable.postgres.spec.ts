@@ -4,20 +4,20 @@ import OwservablePostgres, {
 	PostgresBackend,
 	PostgresConnector,
 	PostgresListener,
-	TablesEntitiesMap,
-	LiveUpdates,
-	LiveUpdatesRegistry,
-	ObservableTable,
-	ObservableTablesMap,
-	installTriggers,
-	processEntities
+	PostgresTablesEntitiesMap,
+	PostgresLiveUpdates,
+	PostgresLiveUpdatesRegistry,
+	PostgresObservableTable,
+	PostgresObservableTablesMap,
+	installPostgresTriggers,
+	processPostgresEntities
 } from '../src/owservable.postgres';
 
 import PostgresBackendDirect from '../src/postgres.backend';
 import PostgresConnectorDirect from '../src/postgres.connector';
 import PostgresListenerDirect from '../src/postgres.listener';
 import TablesEntitiesMapDirect from '../src/tables.entities.map';
-import LiveUpdatesDirect, {LiveUpdatesRegistry as LiveUpdatesRegistryDirect} from '../src/decorators/live.updates';
+import LiveUpdatesDirect, {PostgresLiveUpdatesRegistry as LiveUpdatesRegistryDirect} from '../src/decorators/live.updates';
 import ObservableTableDirect from '../src/functions/observable.table';
 import ObservableTablesMapDirect from '../src/functions/observable.tables.map';
 import installTriggersDirect from '../src/functions/install.triggers';
@@ -32,13 +32,13 @@ describe('owservable.postgres tests', () => {
 		expect(PostgresBackend).toBe(PostgresBackendDirect);
 		expect(PostgresConnector).toBe(PostgresConnectorDirect);
 		expect(PostgresListener).toBe(PostgresListenerDirect);
-		expect(TablesEntitiesMap).toBe(TablesEntitiesMapDirect);
-		expect(LiveUpdates).toBe(LiveUpdatesDirect);
-		expect(LiveUpdatesRegistry).toBe(LiveUpdatesRegistryDirect);
-		expect(ObservableTable).toBe(ObservableTableDirect);
-		expect(ObservableTablesMap).toBe(ObservableTablesMapDirect);
-		expect(installTriggers).toBe(installTriggersDirect);
-		expect(processEntities).toBe(processEntitiesDirect);
+		expect(PostgresTablesEntitiesMap).toBe(TablesEntitiesMapDirect);
+		expect(PostgresLiveUpdates).toBe(LiveUpdatesDirect);
+		expect(PostgresLiveUpdatesRegistry).toBe(LiveUpdatesRegistryDirect);
+		expect(PostgresObservableTable).toBe(ObservableTableDirect);
+		expect(PostgresObservableTablesMap).toBe(ObservableTablesMapDirect);
+		expect(installPostgresTriggers).toBe(installTriggersDirect);
+		expect(processPostgresEntities).toBe(processEntitiesDirect);
 	});
 
 	it('should export an empty default object', () => {

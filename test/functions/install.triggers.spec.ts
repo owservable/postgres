@@ -1,6 +1,6 @@
 'use strict';
 
-import installTriggers from '../../src/functions/install.triggers';
+import installPostgresTriggers from '../../src/functions/install.triggers';
 
 class UserEntity {}
 class NoteEntity {}
@@ -31,7 +31,7 @@ describe('install.triggers tests', () => {
 	});
 
 	it('should install the notify function with the default channel', async () => {
-		await installTriggers(orm, []);
+		await installPostgresTriggers(orm, []);
 
 		expect(execute).toHaveBeenCalledTimes(1);
 		const functionSql: string = execute.mock.calls[0][0];
@@ -42,7 +42,7 @@ describe('install.triggers tests', () => {
 	});
 
 	it('should install the notify function with a custom channel', async () => {
-		await installTriggers(orm, [], 'custom_channel');
+		await installPostgresTriggers(orm, [], 'custom_channel');
 
 		const functionSql: string = execute.mock.calls[0][0];
 		expect(functionSql).toContain("'custom_channel'");
@@ -50,7 +50,7 @@ describe('install.triggers tests', () => {
 	});
 
 	it('should install a trigger per entity using the pk column field name', async () => {
-		await installTriggers(orm, [UserEntity]);
+		await installPostgresTriggers(orm, [UserEntity]);
 
 		expect(execute).toHaveBeenCalledTimes(2);
 		const triggerSql: string = execute.mock.calls[1][0];
@@ -61,7 +61,7 @@ describe('install.triggers tests', () => {
 	});
 
 	it('should fall back to the pk property when fieldNames are missing', async () => {
-		await installTriggers(orm, [NoteEntity]);
+		await installPostgresTriggers(orm, [NoteEntity]);
 
 		const triggerSql: string = execute.mock.calls[1][0];
 		expect(triggerSql).toContain('"notes_owservable_notify"');
@@ -69,7 +69,7 @@ describe('install.triggers tests', () => {
 	});
 
 	it('should fall back to the pk property when the pk property metadata is missing', async () => {
-		await installTriggers(orm, [TagEntity]);
+		await installPostgresTriggers(orm, [TagEntity]);
 
 		const triggerSql: string = execute.mock.calls[1][0];
 		expect(triggerSql).toContain('"tags_owservable_notify"');
@@ -77,7 +77,7 @@ describe('install.triggers tests', () => {
 	});
 
 	it('should install triggers for multiple entities', async () => {
-		await installTriggers(orm, [UserEntity, NoteEntity, TagEntity], 'chan');
+		await installPostgresTriggers(orm, [UserEntity, NoteEntity, TagEntity], 'chan');
 
 		expect(execute).toHaveBeenCalledTimes(4);
 		expect(execute.mock.calls[1][0]).toContain('"users"');

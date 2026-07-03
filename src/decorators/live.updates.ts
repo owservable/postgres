@@ -1,20 +1,20 @@
 'use strict';
 
-export class LiveUpdatesRegistry {
+export class PostgresLiveUpdatesRegistry {
 	public static add(entity: any): void {
-		LiveUpdatesRegistry._entities.add(entity);
+		PostgresLiveUpdatesRegistry._entities.add(entity);
 	}
 
 	public static has(entity: any): boolean {
-		return LiveUpdatesRegistry._entities.has(entity);
+		return PostgresLiveUpdatesRegistry._entities.has(entity);
 	}
 
 	public static entities(): any[] {
-		return Array.from(LiveUpdatesRegistry._entities);
+		return Array.from(PostgresLiveUpdatesRegistry._entities);
 	}
 
 	public static clear(): void {
-		LiveUpdatesRegistry._entities.clear();
+		PostgresLiveUpdatesRegistry._entities.clear();
 	}
 
 	private static readonly _entities: Set<any> = new Set<any>();
@@ -22,9 +22,9 @@ export class LiveUpdatesRegistry {
 	private constructor() {}
 }
 
-const LiveUpdates = (): ClassDecorator => {
+const PostgresLiveUpdates = (): ClassDecorator => {
 	return (target: any): void => {
-		LiveUpdatesRegistry.add(target);
+		PostgresLiveUpdatesRegistry.add(target);
 	};
 };
-export default LiveUpdates;
+export default PostgresLiveUpdates;
