@@ -1,6 +1,6 @@
 {
 	"name": "@owservable/postgres",
-	"version": "3.0.0",
+	"version": "3.0.1",
 	"description": "owservable postgres backend adapter: LISTEN/NOTIFY live updates, MikroORM entities and process entities",
 	"engines": {
 		"node": ">=24.12.0"
@@ -55,8 +55,8 @@
 	},
 	"devDependencies": {
 		"@eslint/js": "^10.0.1",
-		"@mikro-orm/core": "^6.6.15",
-		"@mikro-orm/postgresql": "^6.6.15",
+		"@mikro-orm/core": "^7.1.5",
+		"@mikro-orm/postgresql": "^7.1.5",
 		"@owservable/core": "^3.0.0",
 		"@types/jest": "^30.0.0",
 		"@types/rewire": "^2.5.30",
@@ -78,5 +78,5 @@
 		"typescript": "^6.0.3",
 		"typescript-eslint": "^8.62.1"
 	},
-	"packageManager": "pnpm@11.9.0"
+	"packageManager": "pnpm@11.10.0"
 }
