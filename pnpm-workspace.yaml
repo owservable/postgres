@@ -1,4 +1,5 @@
 allowBuilds:
+  '@embedded-postgres/windows-x64': true
   '@owservable/actions': true
   '@owservable/core': true
   '@owservable/folders': true

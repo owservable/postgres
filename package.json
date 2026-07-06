@@ -1,6 +1,6 @@
 {
 	"name": "@owservable/postgres",
-	"version": "3.0.2",
+	"version": "3.0.3",
 	"description": "owservable postgres backend adapter: LISTEN/NOTIFY live updates, MikroORM entities and process entities",
 	"engines": {
 		"node": ">=24.12.0"
@@ -21,7 +21,7 @@
 	},
 	"minimumReleaseAge": 2880,
 	"scripts": {
-		"all": "pnpm i & pnpm dedupe & pnpm audit --fix=update & pnpm clean & pnpm format & pnpm build & skeletest -f & strictr -f & pnpm test & pnpm run docs @owservable/postgres",
+		"all": "pnpm i & pnpm dedupe & pnpm audit --fix=update & pnpm clean & pnpm format & pnpm build & skeletest -f & strictr -f & pnpm test & pnpm integration & pnpm run docs @owservable/postgres",
 		"clear:lib": "del /S /Q lib\\*",
 		"build": "pnpm clear:lib & tsc",
 		"build:watch": "tsc --watch",
@@ -31,6 +31,7 @@
 		"docs": "typedoc --readme none --out docs ./src/owservable.postgres.ts",
 		"sync": "git pull & git fetch origin & git merge origin/main & pnpm i & git branch",
 		"test": "node --experimental-vm-modules ./node_modules/jest/bin/jest.js --coverage --config jest.config.js",
+		"integration": "ts-node test/integration/postgres.integration.ts",
 		"quick": "node --experimental-vm-modules ./node_modules/jest/bin/jest.js --config jest.config.js",
 		"coveralls": "cat ./coverage/lcov.info | node node_modules/.bin/coveralls",
 		"test_qube": "node --experimental-vm-modules ./node_modules/jest/bin/jest.js --coverage --config jest.config.js --testResultsProcessor=jest-sonar-reporter",
@@ -41,9 +42,9 @@
 	},
 	"dependencies": {
 		"@mikro-orm/core": "^7.1.5",
-		"@owservable/folders": "^2.2.2",
 		"@mikro-orm/postgresql": "^7.1.5",
 		"@owservable/core": "^3.0.0",
+		"@owservable/folders": "^2.2.2",
 		"@types/lodash": "^4.17.24",
 		"@types/node": "^26.1.0",
 		"@types/pg": "^8.20.0",
@@ -56,6 +57,7 @@
 		"@types/jest": "^30.0.0",
 		"@types/rewire": "^2.5.30",
 		"coveralls": "^3.1.1",
+		"embedded-postgres": "18.4.0-beta.17",
 		"eslint": "^10.6.0",
 		"eslint-config-prettier": "^10.1.8",
 		"eslint-plugin-sonarjs": "^4.1.0",

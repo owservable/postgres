@@ -48,7 +48,7 @@ export default class PostgresConnector {
 		if (updateSchema || triggers) {
 			await PostgresConnector._withSchemaLock({host, port, user, password, database: dbName}, async (): Promise<void> => {
 				if (updateSchema) {
-					await orm.schema.updateSchema({safe});
+					await orm.schema.update({safe});
 					console.log('[@owservable/postgres] -> PostgreSQL schema synchronized', safe ? '(safe mode)' : '');
 				}
 				if (triggers) {

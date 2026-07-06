@@ -76,7 +76,7 @@ describe('postgres.connector tests', () => {
 		ClientMock.mockImplementation(createFakeClient);
 		execute = jest.fn().mockResolvedValue(undefined);
 		mockOrm = {
-			schema: {updateSchema: jest.fn().mockResolvedValue(undefined)},
+			schema: {update: jest.fn().mockResolvedValue(undefined)},
 			getMetadata: (): any => ({get: (name: string): any => metas[name]}),
 			em: {fork: jest.fn((): any => 'forked-em'), getConnection: (): any => ({execute})},
 			close: jest.fn().mockResolvedValue(undefined)
@@ -121,7 +121,7 @@ describe('postgres.connector tests', () => {
 			password: 'p',
 			dbName: 'db'
 		});
-		expect(mockOrm.schema.updateSchema).toHaveBeenCalledWith({safe: true});
+		expect(mockOrm.schema.update).toHaveBeenCalledWith({safe: true});
 		expect(logSpy).toHaveBeenCalledWith('[@owservable/postgres] -> PostgreSQL schema synchronized', '(safe mode)');
 
 		const lock: any = clients[0];
@@ -171,7 +171,7 @@ describe('postgres.connector tests', () => {
 		});
 
 		expect(InitMock).toHaveBeenCalledWith(expect.objectContaining({pool: {min: 1}}));
-		expect(mockOrm.schema.updateSchema).toHaveBeenCalledWith({safe: false});
+		expect(mockOrm.schema.update).toHaveBeenCalledWith({safe: false});
 		expect(logSpy).toHaveBeenCalledWith('[@owservable/postgres] -> PostgreSQL schema synchronized', '');
 
 		const sqls: string[] = execute.mock.calls.map((call: any[]): string => call[0]);
@@ -185,7 +185,7 @@ describe('postgres.connector tests', () => {
 
 		await PostgresConnector.init({...baseOptions(), updateSchema: false, triggers: true});
 
-		expect(mockOrm.schema.updateSchema).not.toHaveBeenCalled();
+		expect(mockOrm.schema.update).not.toHaveBeenCalled();
 		expect(execute).toHaveBeenCalled();
 		expect(lockQueries()).toContain('SELECT pg_advisory_lock($1)');
 	});
@@ -195,21 +195,21 @@ describe('postgres.connector tests', () => {
 
 		await PostgresConnector.init({...baseOptions(), updateSchema: true, triggers: false});
 
-		expect(mockOrm.schema.updateSchema).toHaveBeenCalledWith({safe: true});
+		expect(mockOrm.schema.update).toHaveBeenCalledWith({safe: true});
 		expect(execute).not.toHaveBeenCalled();
 	});
 
 	it('should skip the advisory lock when both updateSchema and triggers are false', async () => {
 		await PostgresConnector.init({...baseOptions(), updateSchema: false, triggers: false});
 
-		expect(mockOrm.schema.updateSchema).not.toHaveBeenCalled();
+		expect(mockOrm.schema.update).not.toHaveBeenCalled();
 		expect(execute).not.toHaveBeenCalled();
 		expect(lockQueries()).not.toContain('SELECT pg_advisory_lock($1)');
 		expect(BackendRegistry.get('users')).toBeInstanceOf(PostgresBackend);
 	});
 
 	it('should release the advisory lock even when the schema sync fails', async () => {
-		mockOrm.schema.updateSchema.mockRejectedValue(new Error('sync failed'));
+		mockOrm.schema.update.mockRejectedValue(new Error('sync failed'));
 
 		await expect(PostgresConnector.init(baseOptions())).rejects.toThrow('sync failed');
 

@@ -5,5 +5,5 @@
 	"testFileExtensionPrefix": "spec",
 	"testExtension": "ts",
 	"ignoreSrcFiles": ["src/types/"],
-	"ignoreTestFiles": ["test/functions/fixtures"]
+	"ignoreTestFiles": ["test/functions/fixtures", "test/integration"]
 }
