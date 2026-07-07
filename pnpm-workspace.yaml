@@ -1,5 +1,6 @@
 allowBuilds:
   '@embedded-postgres/windows-x64': true
+  '@owservable/actions': true
   '@owservable/core': true
   '@owservable/folders': true
   es5-ext: true
@@ -8,6 +9,8 @@ allowBuilds:
 minimumReleaseAgeExclude:
   - '@owservable/core'
   - '@owservable/folders'
+  - '@owservable/actions@3.1.0'
+  - request@2.88.3
 
 overrides:
   'mem@<4.0.0': '>=4.0.0'
