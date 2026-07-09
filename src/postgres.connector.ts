@@ -21,6 +21,7 @@ export type PostgresConnectorOptionsType = {
 	password: string;
 	dbName: string;
 
+	ssl?: boolean | Record<string, any>;
 	channel?: string;
 	updateSchema?: boolean;
 	safe?: boolean;
@@ -32,7 +33,7 @@ export default class PostgresConnector {
 	public static async init(options: PostgresConnectorOptionsType): Promise<any> {
 		if (PostgresConnector._orm) return PostgresConnector._orm;
 
-		const {entities, host, port, user, password, dbName, channel = 'owservable', updateSchema = true, safe = true, triggers = true, ormOptions = {}} = options;
+		const {entities, host, port, user, password, dbName, ssl, channel = 'owservable', updateSchema = true, safe = true, triggers = true, ormOptions = {}} = options;
 
 		const orm: any = await MikroORM.init({
 			entities,
@@ -41,12 +42,15 @@ export default class PostgresConnector {
 			user,
 			password,
 			dbName,
+			...(ssl ? {driverOptions: {connection: {ssl}}} : {}),
 			...ormOptions
 		});
 		console.log('[@owservable/postgres] -> PostgreSQL connected to', `${host}:${port}/${dbName}`);
 
+		const connectionConfig: any = {host, port, user, password, database: dbName, ...(ssl ? {ssl} : {})};
+
 		if (updateSchema || triggers) {
-			await PostgresConnector._withSchemaLock({host, port, user, password, database: dbName}, async (): Promise<void> => {
+			await PostgresConnector._withSchemaLock(connectionConfig, async (): Promise<void> => {
 				if (updateSchema) {
 					await orm.schema.update({safe});
 					console.log('[@owservable/postgres] -> PostgreSQL schema synchronized', safe ? '(safe mode)' : '');
@@ -58,7 +62,7 @@ export default class PostgresConnector {
 			});
 		}
 
-		const listener: PostgresListener = PostgresListener.init({host, port, user, password, database: dbName}, channel);
+		const listener: PostgresListener = PostgresListener.init(connectionConfig, channel);
 
 		for (const entity of entities) {
 			const meta: any = orm.getMetadata().get(entity.name);

@@ -148,6 +148,24 @@ describe('postgres.connector tests', () => {
 		expect(PostgresConnector.em()).toBe('forked-em');
 	});
 
+	it('should thread ssl into the orm, the schema lock client and the listener', async () => {
+		const ssl: any = {rejectUnauthorized: false};
+
+		await PostgresConnector.init({...baseOptions(), ssl});
+		await flush();
+
+		expect(InitMock).toHaveBeenCalledWith(expect.objectContaining({driverOptions: {connection: {ssl}}}));
+		expect(ClientMock).toHaveBeenCalledWith({host: 'localhost', port: 5432, user: 'u', password: 'p', database: 'db', ssl});
+	});
+
+	it('should omit ssl everywhere when not configured', async () => {
+		await PostgresConnector.init(baseOptions());
+		await flush();
+
+		expect(InitMock).toHaveBeenCalledWith(expect.not.objectContaining({driverOptions: expect.anything()}));
+		expect(ClientMock).toHaveBeenCalledWith(expect.not.objectContaining({ssl: expect.anything()}));
+	});
+
 	it('should return the existing orm on subsequent init calls', async () => {
 		const orm: any = await PostgresConnector.init(baseOptions());
 		InitMock.mockClear();
