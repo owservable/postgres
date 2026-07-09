@@ -154,7 +154,7 @@ describe('postgres.connector tests', () => {
 		await PostgresConnector.init({...baseOptions(), ssl});
 		await flush();
 
-		expect(InitMock).toHaveBeenCalledWith(expect.objectContaining({driverOptions: {connection: {ssl}}}));
+		expect(InitMock).toHaveBeenCalledWith(expect.objectContaining({driverOptions: {ssl}}));
 		expect(ClientMock).toHaveBeenCalledWith({host: 'localhost', port: 5432, user: 'u', password: 'p', database: 'db', ssl});
 	});
 

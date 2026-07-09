@@ -42,7 +42,7 @@ export default class PostgresConnector {
 			user,
 			password,
 			dbName,
-			...(ssl ? {driverOptions: {connection: {ssl}}} : {}),
+			...(ssl ? {driverOptions: {ssl}} : {}),
 			...ormOptions
 		});
 		console.log('[@owservable/postgres] -> PostgreSQL connected to', `${host}:${port}/${dbName}`);

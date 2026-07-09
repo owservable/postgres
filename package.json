@@ -1,6 +1,6 @@
 {
 	"name": "@owservable/postgres",
-	"version": "3.1.1",
+	"version": "3.1.2",
 	"description": "owservable postgres backend adapter: LISTEN/NOTIFY live updates, MikroORM entities and process entities",
 	"engines": {
 		"node": ">=24.12.0"
