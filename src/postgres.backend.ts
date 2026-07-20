@@ -1,7 +1,7 @@
 'use strict';
 
 import {Observable} from 'rxjs';
-import {wrap} from '@mikro-orm/core';
+import {raw, wrap} from '@mikro-orm/core';
 import {cloneDeep, each, isEmpty, isPlainObject, isString, omit} from 'lodash';
 
 import type {IObservableBackend} from '@owservable/core';
@@ -10,10 +10,13 @@ import PostgresListener from './postgres.listener';
 import PostgresObservableTable from './functions/observable.table';
 import PostgresObservableTablesMap from './functions/observable.tables.map';
 
+const PCRE_HEX_ESCAPE: RegExp = /\\x([0-9a-fA-F]{2})/g;
+
 export default class PostgresBackend implements IObservableBackend {
 	private readonly _orm: any;
 	private readonly _entity: any;
 	private readonly _listener: PostgresListener;
+	private readonly _meta: any;
 	private readonly _tableName: string;
 	private readonly _pkProperty: string;
 
@@ -22,9 +25,9 @@ export default class PostgresBackend implements IObservableBackend {
 		this._entity = entity;
 		this._listener = listener;
 
-		const meta: any = orm.getMetadata().get(entity.name);
-		this._tableName = meta.tableName;
-		this._pkProperty = meta.primaryKeys[0];
+		this._meta = orm.getMetadata().get(entity.name);
+		this._tableName = this._meta.tableName;
+		this._pkProperty = this._meta.primaryKeys[0];
 	}
 
 	public target(): string {
@@ -67,6 +70,12 @@ export default class PostgresBackend implements IObservableBackend {
 		return em.count(this._entity, this._translateQuery(query));
 	}
 
+	public async distinct(attribute: string, query: any = {}): Promise<any[]> {
+		const em: any = this._orm.em.fork();
+		const rows: any[] = await em.createQueryBuilder(this._entity).select([attribute], true).where(this._translateQuery(query)).execute();
+		return rows.map((row: any): any => row[attribute]);
+	}
+
 	public async populate(document: any, _populate: any): Promise<any> {
 		return document;
 	}
@@ -103,7 +112,19 @@ export default class PostgresBackend implements IObservableBackend {
 		each(Object.keys(query), (key: string): void => {
 			const value: any = query[key];
 			if ('$and' === key || '$or' === key || '$nor' === key) {
-				translated[key] = this._translateQuery(value);
+				const branches: any = this._translateQuery(value);
+				if (Array.isArray(branches)) {
+					const kept: any[] = branches.filter((branch: any): boolean => !isPlainObject(branch) || Reflect.ownKeys(branch).length > 0);
+					if (kept.length > 0) translated[key] = kept;
+				} else {
+					translated[key] = branches;
+				}
+				return;
+			}
+
+			if ('$expr' === key) {
+				const condition: any = this._translateExpr(value);
+				if (condition) Object.assign(translated, condition);
 				return;
 			}
 
@@ -122,13 +143,32 @@ export default class PostgresBackend implements IObservableBackend {
 		each(Object.keys(condition), (key: string): void => {
 			const value: any = condition[key];
 			if ('$regex' === key) {
-				translated.$re = value;
-				if (isString(condition.$options) && condition.$options.includes('i')) translated.$flags = 'i';
+				translated.$re = this._toPostgresRegex(value, condition.$options);
 			} else if ('$options' !== key && '$type' !== key) {
 				translated[key] = value;
 			}
 		});
 		return translated;
+	}
+
+	private _translateExpr(expr: any): any {
+		const regexMatch: any = expr?.$regexMatch;
+		const input: any = regexMatch?.input?.$toString;
+		if (!isString(input) || !input.startsWith('$')) return null;
+
+		const property: any = this._meta.properties[input.substring(1)];
+		const fieldName: string = property?.fieldNames?.[0];
+		if (!fieldName) return null;
+
+		return {[raw(`cast("${fieldName}" as text)`) as any]: {$re: this._toPostgresRegex(String(regexMatch.regex), regexMatch.options)}};
+	}
+
+	private _toPostgresRegex(pattern: string, options?: any): string {
+		const translated: string = String(pattern).replace(PCRE_HEX_ESCAPE, (_match: string, hex: string): string => {
+			const char: string = String.fromCharCode(parseInt(hex, 16));
+			return /[0-9a-zA-Z]/.test(char) ? char : `\\${char}`;
+		});
+		return isString(options) && options.includes('i') ? `(?i)${translated}` : translated;
 	}
 
 	private _translateSort(sort: any): any {

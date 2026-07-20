@@ -148,6 +148,30 @@ const run = async (): Promise<void> => {
 	const byId: any = await backend.findById(String(row.id), {}, []);
 	assert.equal(byId.name, 'row-one-renamed', 'findById coerces text pk');
 
+	console.log('[integration] 4b. Client-shaped search queries ($regex/$options, PCRE hex escapes, $expr number cast)');
+	const insensitive: any[] = await backend.find({name: {$regex: 'ROW\\x2dTWO', $options: 'i'}}, {}, {}, {id: 1}, []);
+	assert.equal(insensitive.length, 1, '$regex with $options i and PCRE hex escape matches');
+	assert.equal(insensitive[0].name, 'row-two', '$regex match returns the right row');
+
+	const anchored: any[] = await backend.find({name: {$regex: '^row\\x2dtwo$', $options: 'i'}}, {}, {}, {id: 1}, []);
+	assert.equal(anchored.length, 1, 'anchored exact-match $regex works');
+
+	const noMatch: any[] = await backend.find({name: {$regex: 'nosuchvalue', $options: 'i'}}, {}, {}, {id: 1}, []);
+	assert.equal(noMatch.length, 0, 'non-matching $regex returns empty');
+
+	const quickSearchShaped: any[] = await backend.find(
+		{$or: [{$expr: {$regexMatch: {input: {$toString: '$amount'}, regex: '7'}}}, {name: {$regex: '7', $options: 'i'}}]},
+		{},
+		{},
+		{id: 1},
+		[]
+	);
+	assert.equal(quickSearchShaped.length, 1, 'quick-search shaped $or with $expr number cast');
+	assert.equal(quickSearchShaped[0].amount, 7, 'number cast partial match finds the row');
+
+	const distinctNames: any[] = await backend.distinct('name', {name: {$regex: 'row', $options: 'i'}});
+	assert.equal(distinctNames.length, 2, 'distinct with $regex query');
+
 	console.log('[integration] 5. DELETE -> notification without refetch');
 	await em.remove(row).flush();
 

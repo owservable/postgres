@@ -8,7 +8,7 @@ import PostgresBackend from '../src/postgres.backend';
 import PostgresObservableTable from '../src/functions/observable.table';
 import PostgresObservableTablesMap from '../src/functions/observable.tables.map';
 
-jest.mock('@mikro-orm/core', () => ({wrap: jest.fn()}));
+jest.mock('@mikro-orm/core', () => ({wrap: jest.fn(), raw: jest.fn((sql: string): any => Symbol(sql))}));
 
 class UserEntity {}
 
@@ -21,7 +21,11 @@ describe('postgres.backend tests', () => {
 	const meta: any = {
 		tableName: 'users',
 		primaryKeys: ['id'],
-		properties: {id: {type: 'number', fieldNames: ['id']}},
+		properties: {
+			id: {type: 'number', fieldNames: ['id']},
+			name: {type: 'string', fieldNames: ['name']},
+			amount: {type: 'number', fieldNames: ['amount']}
+		},
 		props: [{name: 'id', fieldNames: ['id']}]
 	};
 
@@ -73,12 +77,58 @@ describe('postgres.backend tests', () => {
 		]);
 	});
 
-	it('should translate $regex conditions into $re with case-insensitive flags', async () => {
+	it('should translate $regex conditions into $re with inline case-insensitive flags', async () => {
 		em.find.mockResolvedValue([]);
 
 		await backend.find({name: {$regex: '^Jo', $options: 'i'}, note: {$regex: 'x$'}}, null, null, null, null);
 
-		expect(em.find).toHaveBeenCalledWith(UserEntity, {name: {$re: '^Jo', $flags: 'i'}, note: {$re: 'x$'}}, expect.anything());
+		expect(em.find).toHaveBeenCalledWith(UserEntity, {name: {$re: '(?i)^Jo'}, note: {$re: 'x$'}}, expect.anything());
+	});
+
+	it('should decode PCRE hex escapes into postgres-safe literals', async () => {
+		em.find.mockResolvedValue([]);
+
+		await backend.find({name: {$regex: 'row\\x2dtwo\\x61\\x24', $options: 'i'}}, null, null, null, null);
+
+		expect(em.find).toHaveBeenCalledWith(UserEntity, {name: {$re: '(?i)row\\-twoa\\$'}}, expect.anything());
+	});
+
+	it('should translate $expr regexMatch into a cast-to-text regex condition', async () => {
+		em.find.mockResolvedValue([]);
+
+		await backend.find({$or: [{$expr: {$regexMatch: {input: {$toString: '$amount'}, regex: '7'}}}, {name: {$regex: '7', $options: 'i'}}]}, null, null, null, null);
+
+		const where: any = em.find.mock.calls[0][1];
+		expect(where.$or).toHaveLength(2);
+
+		const [castBranch, nameBranch] = where.$or;
+		const castKeys: any[] = Reflect.ownKeys(castBranch);
+		expect(castKeys).toHaveLength(1);
+		expect(String(castKeys[0].description ?? castKeys[0])).toContain('cast("amount" as text)');
+		expect(castBranch[castKeys[0]]).toEqual({$re: '7'});
+		expect(nameBranch).toEqual({name: {$re: '(?i)7'}});
+	});
+
+	it('should drop the whole logical branch when nothing in it is translatable', async () => {
+		em.find.mockResolvedValue([]);
+
+		await backend.find({$or: [{$expr: {$regexMatch: {input: {$toString: 'amount'}, regex: '7'}}}]}, null, null, null, null);
+
+		expect(em.find).toHaveBeenCalledWith(UserEntity, {}, expect.anything());
+	});
+
+	it('should drop untranslatable $expr branches instead of passing them through', async () => {
+		em.find.mockResolvedValue([]);
+
+		await backend.find(
+			{$or: [{$expr: null}, {$expr: {$unknownOp: 1}}, {$expr: {$regexMatch: {input: {$toString: '$ghost'}, regex: '7'}}}, {name: {$regex: 'a', $options: 'i'}}]},
+			null,
+			null,
+			null,
+			null
+		);
+
+		expect(em.find).toHaveBeenCalledWith(UserEntity, {$or: [{name: {$re: '(?i)a'}}]}, expect.anything());
 	});
 
 	it('should keep native operators and drop mongo-only conditions', async () => {
@@ -94,7 +144,35 @@ describe('postgres.backend tests', () => {
 
 		await backend.find({$or: [{name: {$regex: 'a', $options: 'i'}}, {_id: {$in: [1, 2]}}]}, null, null, null, null);
 
-		expect(em.find).toHaveBeenCalledWith(UserEntity, {$or: [{name: {$re: 'a', $flags: 'i'}}, {id: {$in: [1, 2]}}]}, expect.anything());
+		expect(em.find).toHaveBeenCalledWith(UserEntity, {$or: [{name: {$re: '(?i)a'}}, {id: {$in: [1, 2]}}]}, expect.anything());
+	});
+
+	it('should select distinct attribute values with a translated query', async () => {
+		const qb: any = {};
+		qb.select = jest.fn((): any => qb);
+		qb.where = jest.fn((): any => qb);
+		qb.execute = jest.fn().mockResolvedValue([{name: 'a'}, {name: 'b'}, {name: null}]);
+		em.createQueryBuilder = jest.fn((): any => qb);
+
+		const values: any[] = await backend.distinct('name', {name: {$regex: 'a', $options: 'i'}});
+
+		expect(em.createQueryBuilder).toHaveBeenCalledWith(UserEntity);
+		expect(qb.select).toHaveBeenCalledWith(['name'], true);
+		expect(qb.where).toHaveBeenCalledWith({name: {$re: '(?i)a'}});
+		expect(values).toEqual(['a', 'b', null]);
+	});
+
+	it('should select distinct attribute values without a query', async () => {
+		const qb: any = {};
+		qb.select = jest.fn((): any => qb);
+		qb.where = jest.fn((): any => qb);
+		qb.execute = jest.fn().mockResolvedValue([{name: 'a'}]);
+		em.createQueryBuilder = jest.fn((): any => qb);
+
+		const values: any[] = await backend.distinct('name');
+
+		expect(qb.where).toHaveBeenCalledWith({});
+		expect(values).toEqual(['a']);
 	});
 
 	it('should find entities with empty options translated to undefined', async () => {
