@@ -73,6 +73,30 @@ describe('postgres.backend tests', () => {
 		]);
 	});
 
+	it('should translate $regex conditions into $re with case-insensitive flags', async () => {
+		em.find.mockResolvedValue([]);
+
+		await backend.find({name: {$regex: '^Jo', $options: 'i'}, note: {$regex: 'x$'}}, null, null, null, null);
+
+		expect(em.find).toHaveBeenCalledWith(UserEntity, {name: {$re: '^Jo', $flags: 'i'}, note: {$re: 'x$'}}, expect.anything());
+	});
+
+	it('should keep native operators and drop mongo-only conditions', async () => {
+		em.count.mockResolvedValue(0);
+
+		await backend.count({age: {$gte: 5, $lte: 9}, tags: {$in: ['a', 'b']}, ghost: {$type: 'string'}, active: true, createdAt: new Date(0)});
+
+		expect(em.count).toHaveBeenCalledWith(UserEntity, {age: {$gte: 5, $lte: 9}, tags: {$in: ['a', 'b']}, active: true, createdAt: new Date(0)});
+	});
+
+	it('should translate operator conditions nested in logical branches and on _id', async () => {
+		em.find.mockResolvedValue([]);
+
+		await backend.find({$or: [{name: {$regex: 'a', $options: 'i'}}, {_id: {$in: [1, 2]}}]}, null, null, null, null);
+
+		expect(em.find).toHaveBeenCalledWith(UserEntity, {$or: [{name: {$re: 'a', $flags: 'i'}}, {id: {$in: [1, 2]}}]}, expect.anything());
+	});
+
 	it('should find entities with empty options translated to undefined', async () => {
 		em.find.mockResolvedValue([]);
 

@@ -2,7 +2,7 @@
 
 import {Observable} from 'rxjs';
 import {wrap} from '@mikro-orm/core';
-import {cloneDeep, each, isEmpty, isString, omit} from 'lodash';
+import {cloneDeep, each, isEmpty, isPlainObject, isString, omit} from 'lodash';
 
 import type {IObservableBackend} from '@owservable/core';
 
@@ -102,9 +102,31 @@ export default class PostgresBackend implements IObservableBackend {
 		const translated: any = {};
 		each(Object.keys(query), (key: string): void => {
 			const value: any = query[key];
-			if ('_id' === key) translated[this._pkProperty] = value;
-			else if ('$and' === key || '$or' === key || '$nor' === key) translated[key] = this._translateQuery(value);
-			else translated[key] = value;
+			if ('$and' === key || '$or' === key || '$nor' === key) {
+				translated[key] = this._translateQuery(value);
+				return;
+			}
+
+			const property: string = '_id' === key ? this._pkProperty : key;
+			const condition: any = this._translateCondition(value);
+			if (isPlainObject(value) && !isEmpty(value) && isPlainObject(condition) && isEmpty(condition)) return;
+			translated[property] = condition;
+		});
+		return translated;
+	}
+
+	private _translateCondition(condition: any): any {
+		if (!isPlainObject(condition)) return condition;
+
+		const translated: any = {};
+		each(Object.keys(condition), (key: string): void => {
+			const value: any = condition[key];
+			if ('$regex' === key) {
+				translated.$re = value;
+				if (isString(condition.$options) && condition.$options.includes('i')) translated.$flags = 'i';
+			} else if ('$options' !== key && '$type' !== key) {
+				translated[key] = value;
+			}
 		});
 		return translated;
 	}
