@@ -2,7 +2,7 @@
 
 import {Observable} from 'rxjs';
 import {raw, wrap} from '@mikro-orm/core';
-import {cloneDeep, each, isEmpty, isPlainObject, isString, omit} from 'lodash';
+import {cloneDeep, each, isEmpty, isPlainObject, isString, omit, set} from 'lodash';
 
 import type {IObservableBackend} from '@owservable/core';
 
@@ -177,7 +177,7 @@ export default class PostgresBackend implements IObservableBackend {
 		const orderBy: any = {};
 		each(Object.keys(sort), (key: string): void => {
 			const direction: any = sort[key];
-			orderBy[key] = -1 === direction || 'desc' === direction ? 'desc' : 'asc';
+			set(orderBy, key, -1 === direction || 'desc' === direction ? 'desc' : 'asc');
 		});
 		return orderBy;
 	}
