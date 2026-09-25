@@ -1,7 +1,7 @@
 'use strict';
 
 import {Observable} from 'rxjs';
-import {raw, wrap} from '@mikro-orm/core';
+import {wrap} from '@mikro-orm/core';
 import {cloneDeep, each, isEmpty, isPlainObject, isString, omit, setWith} from 'lodash';
 
 import type {IObservableBackend} from '@owservable/core';
@@ -9,8 +9,7 @@ import type {IObservableBackend} from '@owservable/core';
 import PostgresListener from './postgres.listener';
 import PostgresObservableTable from './functions/observable.table';
 import PostgresObservableTablesMap from './functions/observable.tables.map';
-
-const PCRE_HEX_ESCAPE: RegExp = /\\x([0-9a-fA-F]{2})/g;
+import translateQuery from './functions/translate.query';
 
 const DESCENDING_SORT_VALUES: string[] = ['-1', 'desc', 'descending'];
 const UNSAFE_SORT_SEGMENTS: string[] = ['__proto__', 'constructor', 'prototype'];
@@ -108,70 +107,7 @@ export default class PostgresBackend implements IObservableBackend {
 	}
 
 	private _translateQuery(query: any): any {
-		if (!query || isString(query)) return query;
-		if (Array.isArray(query)) return query.map((entry: any): any => this._translateQuery(entry));
-
-		const translated: any = {};
-		each(Object.keys(query), (key: string): void => {
-			const value: any = query[key];
-			if ('$and' === key || '$or' === key || '$nor' === key) {
-				const branches: any = this._translateQuery(value);
-				if (Array.isArray(branches)) {
-					const kept: any[] = branches.filter((branch: any): boolean => !isPlainObject(branch) || Reflect.ownKeys(branch).length > 0);
-					if (kept.length > 0) translated[key] = kept;
-				} else {
-					translated[key] = branches;
-				}
-				return;
-			}
-
-			if ('$expr' === key) {
-				const condition: any = this._translateExpr(value);
-				if (condition) Object.assign(translated, condition);
-				return;
-			}
-
-			const property: string = '_id' === key ? this._pkProperty : key;
-			const condition: any = this._translateCondition(value);
-			if (isPlainObject(value) && !isEmpty(value) && isPlainObject(condition) && isEmpty(condition)) return;
-			translated[property] = condition;
-		});
-		return translated;
-	}
-
-	private _translateCondition(condition: any): any {
-		if (!isPlainObject(condition)) return condition;
-
-		const translated: any = {};
-		each(Object.keys(condition), (key: string): void => {
-			const value: any = condition[key];
-			if ('$regex' === key) {
-				translated.$re = this._toPostgresRegex(value, condition.$options);
-			} else if ('$options' !== key && '$type' !== key) {
-				translated[key] = value;
-			}
-		});
-		return translated;
-	}
-
-	private _translateExpr(expr: any): any {
-		const regexMatch: any = expr?.$regexMatch;
-		const input: any = regexMatch?.input?.$toString;
-		if (!isString(input) || !input.startsWith('$')) return null;
-
-		const property: any = this._meta.properties[input.substring(1)];
-		const fieldName: string = property?.fieldNames?.[0];
-		if (!fieldName) return null;
-
-		return {[raw(`cast("${fieldName}" as text)`) as any]: {$re: this._toPostgresRegex(String(regexMatch.regex), regexMatch.options)}};
-	}
-
-	private _toPostgresRegex(pattern: string, options?: any): string {
-		const translated: string = String(pattern).replace(PCRE_HEX_ESCAPE, (_match: string, hex: string): string => {
-			const char: string = String.fromCharCode(parseInt(hex, 16));
-			return /[0-9a-zA-Z]/.test(char) ? char : `\\${char}`;
-		});
-		return isString(options) && options.includes('i') ? `(?i)${translated}` : translated;
+		return translateQuery(query, this._meta, {regex: true});
 	}
 
 	private _translateSort(sort: any): any {

@@ -7,6 +7,7 @@ import {wrap} from '@mikro-orm/core';
 import PostgresBackend from '../src/postgres.backend';
 import PostgresObservableTable from '../src/functions/observable.table';
 import PostgresObservableTablesMap from '../src/functions/observable.tables.map';
+import {UntranslatableQueryError} from '../src/functions/translate.query';
 
 jest.mock('@mikro-orm/core', () => ({wrap: jest.fn(), raw: jest.fn((sql: string): any => Symbol(sql))}));
 
@@ -53,7 +54,7 @@ describe('postgres.backend tests', () => {
 		em.find.mockResolvedValue([{id: 1}, {id: 2}]);
 
 		const result: any[] = await backend.find(
-			{_id: 7, name: 'x', $and: [{_id: '3'}, 'raw'], $or: {y: 1}, $nor: [{z: 2}]},
+			{_id: 7, name: 'x', $and: [{_id: '3'}], $or: [{y: 1}], $nor: [{z: 2}]},
 			{name: 1, secret: 0},
 			{skip: 5, limit: 10},
 			{a: 1, b: -1, c: 'desc', d: 'asc'},
@@ -62,7 +63,7 @@ describe('postgres.backend tests', () => {
 
 		expect(em.find).toHaveBeenCalledWith(
 			UserEntity,
-			{id: 7, name: 'x', $and: [{id: '3'}, 'raw'], $or: {y: 1}, $nor: [{z: 2}]},
+			{id: 7, name: 'x', $and: [{id: '3'}], $or: [{y: 1}], $nor: [{z: 2}]},
 			{
 				fields: ['name'],
 				orderBy: [{a: 'asc'}, {b: 'desc'}, {c: 'desc'}, {d: 'asc'}],
@@ -109,12 +110,12 @@ describe('postgres.backend tests', () => {
 		expect(nameBranch).toEqual({name: {$re: '(?i)7'}});
 	});
 
-	it('should drop the whole logical branch when nothing in it is translatable', async () => {
+	it('should match nothing when no $or branch is translatable', async () => {
 		em.find.mockResolvedValue([]);
 
 		await backend.find({$or: [{$expr: {$regexMatch: {input: {$toString: 'amount'}, regex: '7'}}}]}, null, null, null, null);
 
-		expect(em.find).toHaveBeenCalledWith(UserEntity, {}, expect.anything());
+		expect(em.find).toHaveBeenCalledWith(UserEntity, {id: {$in: []}}, expect.anything());
 	});
 
 	it('should drop untranslatable $expr branches instead of passing them through', async () => {
@@ -131,12 +132,17 @@ describe('postgres.backend tests', () => {
 		expect(em.find).toHaveBeenCalledWith(UserEntity, {$or: [{name: {$re: '(?i)a'}}]}, expect.anything());
 	});
 
-	it('should keep native operators and drop mongo-only conditions', async () => {
+	it('should keep native operators', async () => {
 		em.count.mockResolvedValue(0);
 
-		await backend.count({age: {$gte: 5, $lte: 9}, tags: {$in: ['a', 'b']}, ghost: {$type: 'string'}, active: true, createdAt: new Date(0)});
+		await backend.count({age: {$gte: 5, $lte: 9}, tags: {$in: ['a', 'b']}, active: true, createdAt: new Date(0)});
 
 		expect(em.count).toHaveBeenCalledWith(UserEntity, {age: {$gte: 5, $lte: 9}, tags: {$in: ['a', 'b']}, active: true, createdAt: new Date(0)});
+	});
+
+	it('should reject mongo-only conditions instead of dropping them', async () => {
+		await expect(backend.count({ghost: {$type: 'string'}})).rejects.toThrow(UntranslatableQueryError);
+		expect(em.count).not.toHaveBeenCalled();
 	});
 
 	it('should translate operator conditions nested in logical branches and on _id', async () => {
