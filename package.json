@@ -1,6 +1,6 @@
 {
 	"name": "@owservable/postgres",
-	"version": "3.1.9",
+	"version": "3.2.0",
 	"description": "owservable postgres backend adapter: LISTEN/NOTIFY live updates, MikroORM entities and process entities",
 	"engines": {
 		"node": ">=24.12.0"
@@ -41,12 +41,12 @@
 		"preinstall": "npx only-allow pnpm"
 	},
 	"dependencies": {
-		"@mikro-orm/core": "^7.2.1",
-		"@mikro-orm/postgresql": "^7.2.1",
-		"@owservable/core": "^3.1.7",
-		"@owservable/folders": "^3.1.7",
+		"@mikro-orm/core": "^7.2.2",
+		"@mikro-orm/postgresql": "^7.2.2",
+		"@owservable/core": "^3.2.0",
+		"@owservable/folders": "^3.2.0",
 		"@types/lodash": "^4.17.25",
-		"@types/node": "^26.6.2",
+		"@types/node": "^26.6.3",
 		"@types/pg": "^8.23.1",
 		"lodash": "^4.18.1",
 		"pg": "^8.23.0",
@@ -56,7 +56,7 @@
 		"@eslint/js": "^10.0.1",
 		"@types/jest": "^30.0.0",
 		"@types/rewire": "^2.5.30",
-		"coveralls": "coveralls < coverage/lcov.info",
+		"coveralls": "^3.1.1",
 		"embedded-postgres": "18.4.0-beta.17",
 		"eslint": "^10.11.0",
 		"eslint-config-prettier": "^10.1.8",
@@ -68,7 +68,7 @@
 		"skeletest": "^0.7.5",
 		"source-map-support": "^0.5.21",
 		"strictr": "^0.5.7",
-		"ts-jest": "^29.4.13",
+		"ts-jest": "^29.4.14",
 		"ts-node": "^10.9.2",
 		"typedoc": "^0.28.20",
 		"typescript": "^6.0.3",
